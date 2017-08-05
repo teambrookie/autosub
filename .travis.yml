@@ -1,0 +1,22 @@
+sudo: required
+
+language: go
+
+services:
+  - docker
+
+go:
+  - 1.8.x
+  
+after_success:
+  - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o autosub .
+  - if [ "$TRAVIS_BRANCH" == "master" ]; then
+    docker build -t teambrookie/autosub .;
+    docker login -u="$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
+    docker push teambrookie/autosub;
+    fi
+  - if [ "$TRAVIS_BRANCH" != "master" ]; then
+    docker build -t teambrookie/autosub:$TRAVIS_BRANCH .;
+    docker login -u="$DOCKER_USERNAME" -p "$DOCKER_PASSWORD";
+    docker push teambrookie/autosub:$TRAVIS_BRANCH;
+    fi
